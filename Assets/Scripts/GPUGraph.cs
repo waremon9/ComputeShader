@@ -1,10 +1,14 @@
 using UnityEngine;
 public class GPUGraph : MonoBehaviour {
-    public enum TransitionMode { Cycle, Random }
+    public enum TransitionMode { None, Cycle, Random }
+
+    private const int maxResolution = 1000;
+
     private static readonly int positionsId = Shader.PropertyToID("_Positions");
     private static readonly int resolutionId = Shader.PropertyToID("_Resolution");
     private static readonly int stepId = Shader.PropertyToID("_Step");
     private static readonly int timeId = Shader.PropertyToID("_Time");
+    private static readonly int transitionProgressId = Shader.PropertyToID("_TransitionProgress");
 
     [SerializeField]
     private ComputeShader computeShader;
@@ -12,7 +16,7 @@ public class GPUGraph : MonoBehaviour {
     private Material material;
     [SerializeField]
     private Mesh mesh;
-    [SerializeField] [Range(10, 1000)]
+    [SerializeField] [Range(10, maxResolution)]
     private int resolution = 10;
     [SerializeField]
     private FunctionLibrary.FunctionName function;
@@ -46,7 +50,7 @@ public class GPUGraph : MonoBehaviour {
     }
 
     private void OnEnable() {
-        this.positionsBuffer = new ComputeBuffer(this.resolution * this.resolution, 12);
+        this.positionsBuffer = new ComputeBuffer(maxResolution * maxResolution, 3 * 4);
     }
 
     private void OnDisable() {
@@ -60,19 +64,33 @@ public class GPUGraph : MonoBehaviour {
         this.computeShader.SetFloat(stepId, step);
         this.computeShader.SetFloat(timeId, Time.time);
 
-        this.computeShader.SetBuffer(0, positionsId, this.positionsBuffer);
+        if (this.transitioning) {
+            this.computeShader.SetFloat(transitionProgressId, Mathf.SmoothStep(0f, 1f, this.duration / this.transitionDuration));
+        }
+
+        int kernelIndex = (int)this.function + (int)(this.transitioning ? this.transitionFunction : this.function) * FunctionLibrary.FunctionCount;
+        this.computeShader.SetBuffer(kernelIndex, positionsId, this.positionsBuffer);
 
         int groups = Mathf.CeilToInt(this.resolution / 8f);
-        this.computeShader.Dispatch(0, groups, groups, 1);
+        this.computeShader.Dispatch(kernelIndex, groups, groups, 1);
 
         this.material.SetBuffer(positionsId, this.positionsBuffer);
         this.material.SetFloat(stepId, step);
 
         Bounds bounds = new(Vector3.zero, Vector3.one * (2f + 2f / this.resolution));
-        Graphics.DrawMeshInstancedProcedural(this.mesh, 0, this.material, bounds, this.positionsBuffer.count);
+        Graphics.DrawMeshInstancedProcedural(this.mesh, 0, this.material, bounds, this.resolution * this.resolution);
     }
 
     private void PickNextFunction() {
-        this.function = this.transitionMode == TransitionMode.Cycle ? FunctionLibrary.GetNextFunctionName(this.function) : FunctionLibrary.GetRandomFunctionNameOtherThan(this.function);
+        switch (this.transitionMode) {
+            case TransitionMode.None:
+                break;
+            case TransitionMode.Cycle:
+                this.function = FunctionLibrary.GetNextFunctionName(this.function);
+                break;
+            case TransitionMode.Random:
+                this.function = FunctionLibrary.GetRandomFunctionNameOtherThan(this.function);
+                break;
+        }
     }
 }

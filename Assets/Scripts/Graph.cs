@@ -1,6 +1,7 @@
+using System;
 using UnityEngine;
 public class Graph : MonoBehaviour {
-    public enum TransitionMode { Cycle, Random }
+    public enum TransitionMode { None, Cycle, Random }
 
     [SerializeField]
     private Transform pointPrefab;
@@ -56,7 +57,16 @@ public class Graph : MonoBehaviour {
     }
 
     private void PickNextFunction() {
-        this.function = this.transitionMode == TransitionMode.Cycle ? FunctionLibrary.GetNextFunctionName(this.function) : FunctionLibrary.GetRandomFunctionNameOtherThan(this.function);
+        switch (this.transitionMode) {
+            case TransitionMode.None:
+                break;
+            case TransitionMode.Cycle:
+                this.function = FunctionLibrary.GetNextFunctionName(this.function);
+                break;
+            case TransitionMode.Random:
+                this.function = FunctionLibrary.GetRandomFunctionNameOtherThan(this.function);
+                break;
+        }
     }
 
     private void UpdateFunction() {
