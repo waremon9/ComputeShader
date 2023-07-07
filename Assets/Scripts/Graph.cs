@@ -4,36 +4,38 @@ public class Graph : MonoBehaviour {
     private Transform pointPrefab;
     [SerializeField] [Range(10, 100)]
     private int resolution = 10;
+    [SerializeField]
+    private FunctionLibrary.FunctionName function;
 
     private Transform[] points;
 
     private void Awake() {
-        Vector3 position = Vector3.zero;
         float step = 2f / this.resolution;
         Vector3 scale = Vector3.one * step;
 
-        this.points = new Transform[this.resolution];
+        this.points = new Transform[this.resolution * this.resolution];
 
         for (int i = 0; i < this.points.Length; i++) {
             Transform point = this.points[i] = Instantiate(this.pointPrefab);
 
-            position.x = (i + 0.5f) * step - 1f;
-
-            point.localPosition = position;
             point.localScale = scale;
-
             point.SetParent(this.transform, false);
         }
     }
 
     private void Update() {
+        FunctionLibrary.Function f = FunctionLibrary.GetFunction(this.function);
         float time = Time.time;
-        for (int i = 0; i < this.points.Length; i++) {
-            Transform point = this.points[i];
-            Vector3 position = point.localPosition;
-            position.y = FunctionLibrary.MultiWave(position.x, time);
-            ;
-            point.localPosition = position;
+        float step = 2f / this.resolution;
+        float v = 0.5f * step - 1f;
+        for (int i = 0, x = 0, z = 0; i < this.points.Length; i++, x++) {
+            if (x == this.resolution) {
+                x = 0;
+                z += 1;
+                v = (z + 0.5f) * step - 1f;
+            }
+            float u = (x + 0.5f) * step - 1f;
+            this.points[i].localPosition = f(u, v, time);
         }
     }
 }
