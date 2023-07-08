@@ -651,10 +651,10 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: a01052cc672b98e4596a859ba598e2ac, type: 2}
   mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
   resolution: 1000
-  function: 2
-  transitionMode: 2
-  functionDuration: 4
-  transitionDuration: 1
+  function: 0
+  transitionMode: 1
+  functionDuration: 3
+  transitionDuration: 1.5
 --- !u!4 &973346366
 Transform:
   m_ObjectHideFlags: 0
@@ -700,9 +700,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pointPrefab: {fileID: 1284921368287588623, guid: 29d85a07c7de39a47ae5cdc38f366f51, type: 3}
-  resolution: 100
-  function: 0
-  transitionMode: 1
+  resolution: 40
+  function: 5
+  transitionMode: 0
   functionDuration: 2
   transitionDuration: 1
 --- !u!4 &1028403007

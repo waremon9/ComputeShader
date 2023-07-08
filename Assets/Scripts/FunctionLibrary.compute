@@ -3,30 +3,42 @@
 #pragma kernel WaveToRippleKernel
 #pragma kernel WaveToSphereKernel
 #pragma kernel WaveToTorusKernel
+#pragma kernel WaveToPulseTorusKernel
 
 #pragma kernel MultiWaveToWaveKernel
 #pragma kernel MultiWaveKernel
 #pragma kernel MultiWaveToRippleKernel
 #pragma kernel MultiWaveToSphereKernel
 #pragma kernel MultiWaveToTorusKernel
+#pragma kernel MultiWaveToPulseTorusKernel
 
 #pragma kernel RippleToWaveKernel
 #pragma kernel RippleToMultiWaveKernel
 #pragma kernel RippleKernel
 #pragma kernel RippleToSphereKernel
 #pragma kernel RippleToTorusKernel
+#pragma kernel RippleToPulseTorusKernel
 
 #pragma kernel SphereToWaveKernel
 #pragma kernel SphereToMultiWaveKernel
 #pragma kernel SphereToRippleKernel
 #pragma kernel SphereKernel
 #pragma kernel SphereToTorusKernel
+#pragma kernel SphereToPulseTorusKernel
 
 #pragma kernel TorusToWaveKernel
 #pragma kernel TorusToMultiWaveKernel
 #pragma kernel TorusToRippleKernel
 #pragma kernel TorusToSphereKernel
 #pragma kernel TorusKernel
+#pragma kernel TorusToPulseTorusKernel
+
+#pragma kernel PulseTorusToWaveKernel
+#pragma kernel PulseTorusToMultiWaveKernel
+#pragma kernel PulseTorusToRippleKernel
+#pragma kernel PulseTorusToSphereKernel
+#pragma kernel PulseTorusToTorusKernel
+#pragma kernel PulseTorusKernel
 
 #define PI 3.14159265358979323846
 
@@ -105,6 +117,18 @@ float3 Torus(float u, float v, float t)
     return p;
 }
 
+ float3 PulseTorus(float u, float v, float t) {
+    float r1 = 0.7 + 0.1 * sin(PI * (8.0 * u + 1.5 * t));
+    float r2 = 0.4 + 0.075 * sin(PI * (8.0 * u + 2.0 * v - 2.0 * t));
+    float r3 = 0.15 + 0.05 * sin(PI * (12.0 * u + 6.0 * v + 3.0 * t));
+    float s = r1 + r2 * cos(PI * v) + r3 * sin(PI * u);
+    float3 p;
+    p.x = s * sin(PI * u);
+    p.y = r2 * sin(PI * v);
+    p.z = s * cos(PI * u);
+    return p;
+}
+
 #define KERNEL_FUNCTION(function) \
     [numthreads(8, 8, 1)] \
     void function##Kernel(uint3 id: SV_DispatchThreadID) \
@@ -126,28 +150,40 @@ KERNEL_FUNCTION(MultiWave)
 KERNEL_FUNCTION(Ripple)
 KERNEL_FUNCTION(Sphere)
 KERNEL_FUNCTION(Torus)
+KERNEL_FUNCTION(PulseTorus)
 
 KERNEL_MORPH_FUNCTION(Wave, MultiWave);
 KERNEL_MORPH_FUNCTION(Wave, Ripple);
 KERNEL_MORPH_FUNCTION(Wave, Sphere);
 KERNEL_MORPH_FUNCTION(Wave, Torus);
+KERNEL_MORPH_FUNCTION(Wave, PulseTorus);
 
 KERNEL_MORPH_FUNCTION(MultiWave, Wave);
 KERNEL_MORPH_FUNCTION(MultiWave, Ripple);
 KERNEL_MORPH_FUNCTION(MultiWave, Sphere);
 KERNEL_MORPH_FUNCTION(MultiWave, Torus);
+KERNEL_MORPH_FUNCTION(MultiWave, PulseTorus);
 
 KERNEL_MORPH_FUNCTION(Ripple, Wave);
 KERNEL_MORPH_FUNCTION(Ripple, MultiWave);
 KERNEL_MORPH_FUNCTION(Ripple, Sphere);
 KERNEL_MORPH_FUNCTION(Ripple, Torus);
+KERNEL_MORPH_FUNCTION(Ripple, PulseTorus);
 
 KERNEL_MORPH_FUNCTION(Sphere, Wave);
 KERNEL_MORPH_FUNCTION(Sphere, MultiWave);
 KERNEL_MORPH_FUNCTION(Sphere, Ripple);
 KERNEL_MORPH_FUNCTION(Sphere, Torus);
+KERNEL_MORPH_FUNCTION(Sphere, PulseTorus);
 
 KERNEL_MORPH_FUNCTION(Torus, Wave);
 KERNEL_MORPH_FUNCTION(Torus, MultiWave);
 KERNEL_MORPH_FUNCTION(Torus, Ripple);
 KERNEL_MORPH_FUNCTION(Torus, Sphere);
+KERNEL_MORPH_FUNCTION(Torus, PulseTorus);
+
+KERNEL_MORPH_FUNCTION(PulseTorus, Wave);
+KERNEL_MORPH_FUNCTION(PulseTorus, MultiWave);
+KERNEL_MORPH_FUNCTION(PulseTorus, Ripple);
+KERNEL_MORPH_FUNCTION(PulseTorus, Sphere);
+KERNEL_MORPH_FUNCTION(PulseTorus, Torus);
