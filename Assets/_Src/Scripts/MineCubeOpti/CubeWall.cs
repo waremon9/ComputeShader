@@ -73,7 +73,8 @@ public class CubeWall : MonoBehaviour {
                     alive = true,
                     coordinate = new Vector2Int(x, y),
                     worldPosition = this.transform.position + new Vector3(x - offset, y) * this.cubeScale,
-                    health = this.cubesHealth
+                    maxHealth = this.cubesHealth,
+                    currentHealth = this.cubesHealth
                 };
 
                 this._cubeDataArray2d[x, y] = cube;
@@ -166,11 +167,11 @@ public class CubeWall : MonoBehaviour {
 
     private void DamageCubeAt(int x, int y, float damage) {
         CubeData cube = this._cubeDataArray2d[x, y];
-        cube.health -= damage;
-        if (cube.health <= 0) {
+        cube.TakeDamage(damage);
+        if (cube.currentHealth <= 0) {
             cube.alive = false;
-            this._updateBuffer = true;
         }
+        this._updateBuffer = true;
         this._cubeDataArray2d[cube.coordinate.x, cube.coordinate.y] = cube;
     }
 
@@ -194,7 +195,7 @@ public class CubeWall : MonoBehaviour {
                     continue;
                 }
 
-                float finalDamage = reduceDamageWithDistance ? Mathf.Lerp(0, damage, 1-(float)(x * x + y * y) / (size * size)) : damage;
+                float finalDamage = reduceDamageWithDistance ? Mathf.Lerp(0, damage, 1 - (float)(x * x + y * y) / (size * size)) : damage;
                 this.DamageCubeAt(wallCoordinates.x + x, wallCoordinates.y + y, finalDamage);
             }
         }
@@ -210,6 +211,12 @@ public class CubeWall : MonoBehaviour {
         public bool alive;
         public Vector2Int coordinate;
         public Vector3 worldPosition;
-        public float health;
+        public float maxHealth;
+        public float currentHealth;
+
+        public void TakeDamage(float damage) {
+            this.currentHealth -= damage;
+            this.worldPosition.z += damage / this.maxHealth * 0.001f;
+        }
     }
 }

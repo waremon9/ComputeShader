@@ -383,9 +383,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b49e2296ef52732438d73e4c3b666053, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackPower: 50
+  attackPower: 10
   carveSize: 5
-  reduceDamageWithDistance: 0
+  reduceDamageWithDistance: 1
 --- !u!4 &744793093
 Transform:
   m_ObjectHideFlags: 0
