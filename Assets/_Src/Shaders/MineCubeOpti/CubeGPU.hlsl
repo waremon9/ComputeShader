@@ -2,7 +2,7 @@
     StructuredBuffer<float3> _Positions;
 #endif
 
-float _Step;
+float _Scale;
 
 void ConfigureProcedural () {
     #if defined(UNITY_PROCEDURAL_INSTANCING_ENABLED)
@@ -10,7 +10,8 @@ void ConfigureProcedural () {
 
         unity_ObjectToWorld = 0.0;
         unity_ObjectToWorld._m03_m13_m23_m33 = float4(position, 1.0);
-        unity_ObjectToWorld._m00_m11_m22 = _Step;
+        unity_ObjectToWorld._m00_m11_m22 = _Scale;
+    
     #endif
 }
 
