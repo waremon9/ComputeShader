@@ -2,29 +2,33 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
+
+[RequireComponent(typeof(CompositeCollider2D))]
 public class CubeWall : MonoBehaviour {
     private static readonly int positionsId = Shader.PropertyToID("_Positions");
     private static readonly int scaleId = Shader.PropertyToID("_Scale");
     private static readonly int color1Id = Shader.PropertyToID("_Color1");
     private static readonly int color2Id = Shader.PropertyToID("_Color2");
 
+    [Header("Cube")]
     [SerializeField]
     private Mesh mesh;
     [SerializeField]
     private Material material;
     [SerializeField]
+    private Color color1 = Color.white;
+    [SerializeField]
+    private Color color2 = Color.white;
+    [Header("Size")]
+    [SerializeField]
     private Vector2Int dimensions = new(10, 20);
     public int totalCube;
     [SerializeField] [Range(0, 1.5f)]
     private float cubeScale = 1;
-    [SerializeField]
-    private Color color1 = Color.white;
-    [SerializeField]
-    private Color color2 = Color.white;
+    [Header("Data")]
     [SerializeField]
     private float cubesHealth;
 
-    public List<Vector2Int> toDelete;
     private List<CubeData> _aliveCube;
     private Bounds _bounds;
     private CubeData[,] _cubeDataArray2d;
@@ -32,6 +36,7 @@ public class CubeWall : MonoBehaviour {
     private ComputeBuffer _positionsBuffer;
     private MaterialPropertyBlock _propertyBlock;
     private bool _updateBuffer;
+    private List<EdgeCollider2D> EdgeColliderList = new List<EdgeCollider2D>();
 
     private void Update() {
         if (Input.GetKey(KeyCode.Space)) {
@@ -39,11 +44,6 @@ public class CubeWall : MonoBehaviour {
         }
         if (Input.GetKey(KeyCode.N)) {
             this.RandomBreakCube(10);
-        }
-        if (Input.GetKey(KeyCode.B)) {
-            foreach (Vector2Int vec in this.toDelete) {
-                this.BreakCubeAt(vec.x, vec.y);
-            }
         }
 
         if (this._updateBuffer) {
@@ -69,12 +69,14 @@ public class CubeWall : MonoBehaviour {
         float offset = this.dimensions.x * .5f;
         for (int y = 0; y < this.dimensions.y; y++) {
             for (int x = 0; x < this.dimensions.x; x++) {
+                Vector3 localPosition = new Vector3(x - offset, y) * this.cubeScale;
+
                 CubeData cube = new() {
                     alive = true,
                     coordinate = new Vector2Int(x, y),
-                    worldPosition = this.transform.position + new Vector3(x - offset, y) * this.cubeScale,
+                    worldPosition = this.transform.position + localPosition,
                     maxHealth = this.cubesHealth,
-                    currentHealth = this.cubesHealth
+                    currentHealth = this.cubesHealth,
                 };
 
                 this._cubeDataArray2d[x, y] = cube;
@@ -137,6 +139,12 @@ public class CubeWall : MonoBehaviour {
         }
 
         this._positionsBuffer.SetData(this._positionList);
+    }
+
+    private void UpdateCollider() {
+        this.EdgeColliderList.Clear();
+        
+        
     }
 
     private void RandomBreakCube(int amount = 1) {
